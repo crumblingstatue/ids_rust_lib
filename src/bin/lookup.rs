@@ -1,11 +1,17 @@
-use {ids_rust::init, std::collections::HashMap};
+use ids_rust::{init, SearchArgs};
 
 fn main() {
     let components: Vec<String> = std::env::args().skip(1).collect();
     dbg!(&components);
     let data = init().unwrap();
     let comp_string = components.join("");
-    let args = HashMap::from_iter([("input", &comp_string[..])]);
-    let out = data.search(args, true);
+    let out = data.search(SearchArgs {
+        reverse: false,
+        simple: true,
+        lite: true,
+        filter_level: ids_rust::FilterLevel::JoyoPlus,
+        input: Some(&comp_string),
+        lookup: None,
+    });
     println!("{out}");
 }

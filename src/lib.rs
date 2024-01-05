@@ -41,6 +41,23 @@ pub struct ServerData {
     pub common_comps: Vec<char>,
 }
 
+pub struct SearchArgs<'a> {
+    pub reverse: bool,
+    pub simple: bool,
+    pub lite: bool,
+    pub filter_level: FilterLevel,
+    pub input: Option<&'a str>,
+    pub lookup: Option<&'a str>,
+}
+
+#[repr(u8)]
+pub enum FilterLevel {
+    JoyoPlus = 0,
+    Media = 1,
+    KanjiDicPlus = 2,
+    All = 3,
+}
+
 impl ServerData {
     pub fn radical_text(&self) -> String {
         let mut radical_text = "".to_string();
@@ -58,24 +75,14 @@ impl ServerData {
         }
         radical_text
     }
-    pub fn search(&self, args: HashMap<&str, &str>, lite: bool) -> String {
-        let reverse = args.contains_key("reverse");
-        let simple = args.contains_key("simple");
-        let filter_level = if let Some(x) = args.get("filter_level") {
-            match *x {
-                "joyoplus" => 0,
-                "media" => 1,
-                "kanjidicplus" => 2,
-                "all" => 3,
-                _ => 1,
-            }
-        } else {
-            3
-        };
+    pub fn search(&self, args: SearchArgs) -> String {
+        let reverse = args.reverse;
+        let simple = args.simple;
+        let filter_level = args.filter_level as u8;
 
-        let mut input = args.get("input");
+        let mut input = args.input;
         if let None = input {
-            input = args.get("lookup");
+            input = args.lookup;
         }
 
         if let Some(input) = input {
@@ -136,11 +143,11 @@ impl ServerData {
                 output_list_html += &"(no matches)";
             }
 
-            if lite {
+            if args.lite {
                 return output_list_html;
             }
         } else {
-            if lite {
+            if args.lite {
                 return "".to_string();
             }
         }
