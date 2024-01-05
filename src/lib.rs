@@ -1,12 +1,9 @@
-use std::cmp::Ordering;
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::fs::File;
-use std::io::Read;
-use std::vec::Vec;
-
-extern crate regex;
-use regex::Regex;
+use std::{
+    collections::{HashMap, HashSet},
+    fs::File,
+    io::Read,
+    vec::Vec,
+};
 
 fn is_descriptor(c: char) -> bool {
     c as u32 >= 0x2FF0 && c as u32 <= 0x2FFB
@@ -440,7 +437,7 @@ fn ids_lines_to_mappings(
 fn build_stroke_count_mapping(
     unicode_lines: &Vec<String>,
     joyo_lines: &Vec<String>,
-) -> (HashMap<char, u64>) {
+) -> HashMap<char, u64> {
     let mut stroke_counts = HashMap::<char, u64>::new();
     for line in unicode_lines {
         let mut tokens: Vec<String> = line.split("\t").map(|x| x.to_string()).collect();
@@ -467,7 +464,7 @@ fn build_stroke_count_mapping(
         stroke_counts.insert(kanji, stroke_count);
     }
     for line in joyo_lines {
-        let mut tokens: Vec<String> = line.split("\t").map(|x| x.to_string()).collect();
+        let tokens: Vec<String> = line.split("\t").map(|x| x.to_string()).collect();
         if tokens.len() < 4 {
             continue;
         }
@@ -478,7 +475,7 @@ fn build_stroke_count_mapping(
 
     stroke_counts
 }
-fn build_radical_character_conversion(lines: &Vec<String>) -> (HashMap<char, char>) {
+fn build_radical_character_conversion(lines: &Vec<String>) -> HashMap<char, char> {
     let mut mapping = HashMap::<char, char>::new();
     for line in lines {
         let line = line.split('#').next().unwrap();
@@ -625,15 +622,6 @@ fn main() -> Result<(), std::io::Error> {
     println!("finished loading");
 
     assert!(!serverdata.kanjidicplus.contains(&'䏊'));
-
-    let re = Regex::new(r"([?&;])([^=&;#]+)(=([^&;#]+))?").unwrap();
-
-    let args = std::env::args().collect::<Vec<String>>();
-    let address = if args.len() <= 1 {
-        "localhost:8000"
-    } else {
-        args.get(1).unwrap()
-    };
 
     Ok(())
 }
