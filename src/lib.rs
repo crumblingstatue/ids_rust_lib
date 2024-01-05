@@ -66,7 +66,7 @@ impl ServerData {
         let filter_level = args.filter_level as u8;
 
         let mut input = args.input;
-        if let None = input {
+        if input.is_none() {
             input = args.lookup;
         }
 
@@ -148,12 +148,12 @@ impl ServerData {
         let mut new = HashSet::<char>::new();
 
         for c in set {
-            if let Some(comps) = self.char_to_comp.get(&c) {
-                new = new.union(&comps).cloned().collect();
+            if let Some(comps) = self.char_to_comp.get(c) {
+                new = new.union(comps).cloned().collect();
             }
         }
 
-        new = new.difference(&seen).cloned().collect();
+        new = new.difference(seen).cloned().collect();
         for c in &new {
             seen.insert(*c);
         }
@@ -180,7 +180,7 @@ impl ServerData {
             new = chars.clone();
         }
 
-        new = new.difference(&seen).cloned().collect();
+        new = new.difference(seen).cloned().collect();
         for c in &new {
             seen.insert(*c);
         }
@@ -235,7 +235,7 @@ impl ServerData {
             return 3;
         }
         if c == '免' {
-            return 8;
+            8
         } else if let Some(stroke_count) = self.char_to_strokes.get(&c) {
             *stroke_count
         } else if let Some(set) = self.char_to_first_comp.get(&c) {
@@ -316,7 +316,7 @@ fn ids_lines_to_mappings(
     let mut comp_frequencies = HashMap::new();
     for line in lines {
         let priority_exists = line.contains('J');
-        let mut tokens: Vec<String> = line.split("\t").map(|x| x.to_string()).collect();
+        let mut tokens: Vec<String> = line.split('\t').map(|x| x.to_string()).collect();
         if tokens.len() < 3 {
             continue;
         }
@@ -375,7 +375,7 @@ fn build_stroke_count_mapping(
 ) -> HashMap<char, u64> {
     let mut stroke_counts = HashMap::<char, u64>::new();
     for line in unicode_lines {
-        let mut tokens: Vec<String> = line.split("\t").map(|x| x.to_string()).collect();
+        let mut tokens: Vec<String> = line.split('\t').map(|x| x.to_string()).collect();
         if tokens.len() < 3 {
             continue;
         }
@@ -391,7 +391,7 @@ fn build_stroke_count_mapping(
             std::char::from_u32(u32::from_str_radix(&kanji_codepoint[2..], 16).unwrap()).unwrap();
         let stroke_count_text = tokens
             .remove(0)
-            .split(" ")
+            .split(' ')
             .map(|x| x.to_string())
             .next()
             .unwrap();
@@ -399,7 +399,7 @@ fn build_stroke_count_mapping(
         stroke_counts.insert(kanji, stroke_count);
     }
     for line in joyo_lines {
-        let tokens: Vec<String> = line.split("\t").map(|x| x.to_string()).collect();
+        let tokens: Vec<String> = line.split('\t').map(|x| x.to_string()).collect();
         if tokens.len() < 4 {
             continue;
         }
@@ -414,7 +414,7 @@ fn build_radical_character_conversion(lines: &Vec<String>) -> HashMap<char, char
     let mut mapping = HashMap::<char, char>::new();
     for line in lines {
         let line = line.split('#').next().unwrap();
-        let mut tokens: Vec<String> = line.split(";").map(|x| x.trim().to_string()).collect();
+        let mut tokens: Vec<String> = line.split(';').map(|x| x.trim().to_string()).collect();
         if tokens.len() < 2 {
             continue;
         }
@@ -426,7 +426,7 @@ fn build_radical_character_conversion(lines: &Vec<String>) -> HashMap<char, char
             mapping.insert(radical, kanji);
         } else {
             let parts = source.split("..").collect::<Vec<_>>();
-            for i in u32::from_str_radix(&parts[0], 16).unwrap()
+            for i in u32::from_str_radix(parts[0], 16).unwrap()
                 ..=u32::from_str_radix(parts[1], 16).unwrap()
             {
                 let c = std::char::from_u32(i).unwrap();
@@ -445,7 +445,7 @@ fn load_to_string(fname: &str) -> std::io::Result<String> {
     let mut file = File::open(fname)?;
     let mut string = String::new();
     file.read_to_string(&mut string)?;
-    return Ok(string);
+    Ok(string)
 }
 
 fn is_non_radical_search_component(c: &char) -> bool {
