@@ -14,21 +14,6 @@ fn is_ascii(c: char) -> bool {
 
 type Mapping = HashMap<char, HashSet<char>>;
 
-fn full_width_digits(text: &String) -> String {
-    let mut ret = text.clone();
-    ret = ret.replace("1", "１");
-    ret = ret.replace("2", "２");
-    ret = ret.replace("3", "３");
-    ret = ret.replace("4", "４");
-    ret = ret.replace("5", "５");
-    ret = ret.replace("6", "６");
-    ret = ret.replace("7", "７");
-    ret = ret.replace("8", "８");
-    ret = ret.replace("9", "９");
-    ret = ret.replace("0", "０");
-    ret
-}
-
 pub struct ServerData {
     pub char_to_comp: Mapping,
     pub comp_to_char: Mapping,
@@ -68,7 +53,7 @@ impl ServerData {
                 if last_strokes != 0 {
                     radical_text += "\n";
                 }
-                radical_text += &full_width_digits(&format!("\n{}：", strokes));
+                radical_text.push_str(&format!("{} strokes ：", strokes));
                 last_strokes = strokes;
             }
             radical_text += &format!("{} ", c);
@@ -133,7 +118,7 @@ impl ServerData {
             let mut output_list_html = "".to_string();
             if stroke_counts.len() > 0 {
                 for count in stroke_counts {
-                    output_list_html += &full_width_digits(&format!("\n{}：", count));
+                    output_list_html += &format!("{} strokes：", count);
                     for c in stroke_mapping.get(&count).unwrap() {
                         output_list_html.push(*c);
                     }
