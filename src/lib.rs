@@ -1,7 +1,5 @@
 use std::{
     collections::{HashMap, HashSet},
-    fs::File,
-    io::Read,
     vec::Vec,
 };
 
@@ -441,24 +439,17 @@ fn build_radical_character_conversion(lines: &Vec<String>) -> HashMap<char, char
     mapping
 }
 
-fn load_to_string(fname: &str) -> std::io::Result<String> {
-    let mut file = File::open(fname)?;
-    let mut string = String::new();
-    file.read_to_string(&mut string)?;
-    Ok(string)
-}
-
 fn is_non_radical_search_component(c: &char) -> bool {
     "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳纟门饣马贝车钅鸟页镸讠鱼".contains(*c)
 }
 
 pub fn init() -> std::io::Result<ServerData> {
-    let ids = load_to_string("ids.txt")?; // https://github.com/cjkvi/cjkvi-ids/blob/master/ids.txt
-    let kanjidicplus_kanji = load_to_string("kanjidic2_kanji_plus.txt")?;
-    let media_kanji = load_to_string("common.txt")?;
-    let joyoplus_kanji = load_to_string("joyoplus2.txt")?;
-    let unihan_dict_data = load_to_string("Unihan_DictionaryLikeData.txt")?;
-    let unihan_rad_data = load_to_string("EquivalentUnifiedIdeograph.txt")?;
+    let ids = include_str!("../ids.txt"); // https://github.com/cjkvi/cjkvi-ids/blob/master/ids.txt
+    let kanjidicplus_kanji = include_str!("../kanjidic2_kanji_plus.txt");
+    let media_kanji = include_str!("../common.txt");
+    let joyoplus_kanji = include_str!("../joyoplus2.txt");
+    let unihan_dict_data = include_str!("../Unihan_DictionaryLikeData.txt");
+    let unihan_rad_data = include_str!("../EquivalentUnifiedIdeograph.txt");
 
     let radical_to_char = build_radical_character_conversion(
         &unihan_rad_data
