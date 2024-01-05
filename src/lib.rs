@@ -29,59 +29,36 @@ fn full_width_digits(text: &String) -> String {
     ret
 }
 
-struct ServerData {
-    template: String,
-    char_to_comp: Mapping,
-    comp_to_char: Mapping,
-    char_to_first_comp: HashMap<char, Vec<char>>,
-    kanjidicplus: HashSet<char>,
-    media: HashSet<char>,
-    joyoplus: HashSet<char>,
-    char_to_strokes: HashMap<char, u64>,
-    radical_to_char: HashMap<char, char>,
-    common_comps: Vec<char>,
+pub struct ServerData {
+    pub char_to_comp: Mapping,
+    pub comp_to_char: Mapping,
+    pub char_to_first_comp: HashMap<char, Vec<char>>,
+    pub kanjidicplus: HashSet<char>,
+    pub media: HashSet<char>,
+    pub joyoplus: HashSet<char>,
+    pub char_to_strokes: HashMap<char, u64>,
+    pub radical_to_char: HashMap<char, char>,
+    pub common_comps: Vec<char>,
 }
 
 impl ServerData {
-    fn radical_text(&self) -> String {
-        let mut radical_html = "".to_string();
+    pub fn radical_text(&self) -> String {
+        let mut radical_text = "".to_string();
         let mut last_strokes = 0;
         for c in &self.common_comps {
             let strokes = self.get_strokes(*c);
             if strokes != last_strokes {
                 if last_strokes != 0 {
-                    radical_html += "<br>\n";
+                    radical_text += "\n";
                 }
-                radical_html += &full_width_digits(&format!("\n{}：", strokes));
+                radical_text += &full_width_digits(&format!("\n{}：", strokes));
                 last_strokes = strokes;
             }
-            radical_html += &format!("<span class=radical>{}</span>", c);
+            radical_text += &format!("{} ", c);
         }
-        radical_html
+        radical_text
     }
-    fn default(&self) -> String {
-        let keys = vec![
-            ("input", ""),
-            ("reverse_checked", ""),
-            ("simple_checked", ""),
-            ("selected_joyoplus", ""),
-            ("selected_media", "selected"),
-            ("selected_kanjidicplus", ""),
-            ("selected_all", ""),
-            ("output", ""),
-        ];
-        let mut output = self.template.clone();
-        for key in keys {
-            output = output.replace(("{{{".to_string() + key.0 + "}}}").as_str(), key.1);
-        }
-
-        output = output.replace("{{{radical_search}}}", &self.radical_text());
-
-        output
-    }
-    fn search(&self, args: HashMap<&str, &str>, lite: bool) -> String {
-        let mut output = self.template.clone();
-
+    pub fn search(&self, args: HashMap<&str, &str>, lite: bool) -> String {
         let reverse = args.contains_key("reverse");
         let simple = args.contains_key("simple");
         let filter_level = if let Some(x) = args.get("filter_level") {
@@ -102,8 +79,6 @@ impl ServerData {
         }
 
         if let Some(input) = input {
-            output = output.replace("{{{input}}}", input);
-
             let lookup_output = if reverse {
                 ServerData::chars_to_components
             } else {
@@ -153,55 +128,23 @@ impl ServerData {
                 for count in stroke_counts {
                     output_list_html += &full_width_digits(&format!("\n{}：", count));
                     for c in stroke_mapping.get(&count).unwrap() {
-                        output_list_html += &"<span class=c>";
                         output_list_html.push(*c);
-                        output_list_html += &"</span>";
                     }
-                    output_list_html += &"<br>\n";
+                    output_list_html += &"\n";
                 }
             } else {
-                output_list_html += &"(no matches)<br>";
+                output_list_html += &"(no matches)";
             }
 
             if lite {
                 return output_list_html;
             }
-
-            output = output.replace("{{{output}}}", &output_list_html);
         } else {
             if lite {
                 return "".to_string();
             }
-            output = output.replace("{{{input}}}", "");
-            output = output.replace("{{{output}}}", "");
         }
-
-        output = output.replace(
-            "{{{reverse_checked}}}",
-            if reverse { "checked" } else { "" },
-        );
-        output = output.replace("{{{simple_checked}}}", if simple { "checked" } else { "" });
-
-        output = output.replace(
-            "{{{selected_joyoplus}}}",
-            if filter_level == 0 { "selected" } else { "" },
-        );
-        output = output.replace(
-            "{{{selected_media}}}",
-            if filter_level == 1 { "selected" } else { "" },
-        );
-        output = output.replace(
-            "{{{selected_kanjidicplus}}}",
-            if filter_level == 2 { "selected" } else { "" },
-        );
-        output = output.replace(
-            "{{{selected_all}}}",
-            if filter_level == 3 { "selected" } else { "" },
-        );
-
-        output = output.replace("{{{radical_search}}}", &self.radical_text());
-
-        output
+        unimplemented!()
     }
 
     fn chars_to_components(
@@ -517,8 +460,7 @@ fn is_non_radical_search_component(c: &char) -> bool {
     "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳纟门饣马贝车钅鸟页镸讠鱼".contains(*c)
 }
 
-fn init() -> std::io::Result<ServerData> {
-    let template = load_to_string("template.html")?;
+pub fn init() -> std::io::Result<ServerData> {
     let ids = load_to_string("ids.txt")?; // https://github.com/cjkvi/cjkvi-ids/blob/master/ids.txt
     let kanjidicplus_kanji = load_to_string("kanjidic2_kanji_plus.txt")?;
     let media_kanji = load_to_string("common.txt")?;
@@ -546,7 +488,6 @@ fn init() -> std::io::Result<ServerData> {
     let char_to_strokes = build_stroke_count_mapping(&stroke_lines, &joyo_lines);
 
     let mut data = ServerData {
-        template,
         char_to_comp,
         comp_to_char,
         char_to_first_comp,
@@ -591,37 +532,4 @@ fn init() -> std::io::Result<ServerData> {
     data.common_comps = common_comps.drain(..).map(|x| x.0).collect::<_>();
 
     Ok(data)
-}
-
-fn main() -> Result<(), std::io::Error> {
-    let serverdata = init()?;
-
-    let mut kanji_asdf = serverdata
-        .char_to_comp
-        .keys()
-        .cloned()
-        .collect::<Vec<char>>();
-    kanji_asdf.sort_unstable();
-    let mut strokes_to_char = HashMap::<u64, Vec<char>>::new();
-    for kanji in kanji_asdf {
-        let strokes = serverdata.get_strokes(kanji);
-        if !strokes_to_char.contains_key(&strokes) {
-            strokes_to_char.insert(strokes, Vec::new());
-        }
-        strokes_to_char.get_mut(&strokes).unwrap().push(kanji);
-    }
-
-    let mut strokes_asdf = strokes_to_char.keys().cloned().collect::<Vec<u64>>();
-    strokes_asdf.sort_unstable();
-    println!("most strokes: {}", strokes_asdf.last().unwrap());
-    println!("kanji with that many strokes:");
-    for kanji in strokes_to_char.get(strokes_asdf.last().unwrap()).unwrap() {
-        println!("{}", kanji);
-    }
-
-    println!("finished loading");
-
-    assert!(!serverdata.kanjidicplus.contains(&'䏊'));
-
-    Ok(())
 }
