@@ -49,8 +49,9 @@ pub struct SearchResult {
 }
 
 impl ServerData {
+    #[must_use]
     pub fn radical_text(&self) -> String {
-        let mut radical_text = "".to_string();
+        let mut radical_text = String::new();
         let mut last_strokes = 0;
         for c in &self.common_comps {
             let strokes = self.get_strokes(*c);
@@ -65,6 +66,7 @@ impl ServerData {
         }
         radical_text
     }
+    #[must_use]
     pub fn search(&self, args: SearchArgs) -> Vec<SearchResult> {
         let reverse = args.reverse;
         let simple = args.simple;
