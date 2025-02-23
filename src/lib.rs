@@ -309,7 +309,7 @@ fn ids_lines_to_mappings(
     let mut comp_frequencies = HashMap::new();
     for line in lines {
         let priority_exists = line.contains('J');
-        let mut tokens: Vec<String> = line.split('\t').map(|x| x.to_string()).collect();
+        let mut tokens: Vec<String> = line.split('\t').map(String::from).collect();
         if tokens.len() < 3 {
             continue;
         }
@@ -364,7 +364,7 @@ fn build_stroke_count_mapping(
 ) -> HashMap<char, u8> {
     let mut stroke_counts = HashMap::<char, u8>::new();
     for line in unicode_lines {
-        let mut tokens: Vec<String> = line.split('\t').map(|x| x.to_string()).collect();
+        let mut tokens: Vec<String> = line.split('\t').map(String::from).collect();
         if tokens.len() < 3 {
             continue;
         }
@@ -380,14 +380,14 @@ fn build_stroke_count_mapping(
         let stroke_count_text = tokens
             .remove(0)
             .split(' ')
-            .map(|x| x.to_string())
+            .map(String::from)
             .next()
             .unwrap();
         let stroke_count = stroke_count_text.parse::<u8>().unwrap();
         stroke_counts.insert(kanji, stroke_count);
     }
     for line in joyo_lines {
-        let tokens: Vec<String> = line.split('\t').map(|x| x.to_string()).collect();
+        let tokens: Vec<String> = line.split('\t').map(String::from).collect();
         if tokens.len() < 4 {
             continue;
         }
@@ -444,19 +444,19 @@ pub fn init() -> std::io::Result<ServerData> {
     let radical_to_char = build_radical_character_conversion(
         &unihan_rad_data
             .lines()
-            .map(|x| x.to_string())
+            .map(String::from)
             .collect::<Vec<_>>(),
     );
 
-    let ids_lines: Vec<String> = ids.lines().map(|x| x.to_string()).collect();
+    let ids_lines: Vec<String> = ids.lines().map(String::from).collect();
     let (char_to_comp, comp_to_char, char_to_first_comp, mut comp_frequencies) =
         ids_lines_to_mappings(&ids_lines, &radical_to_char);
 
-    let joyo_lines: Vec<String> = unihan_dict_data.lines().map(|x| x.to_string()).collect();
+    let joyo_lines: Vec<String> = unihan_dict_data.lines().map(String::from).collect();
     let stroke_lines: Vec<String> = unihan_dict_data
         .lines()
         .filter(|x| x.starts_with("U+"))
-        .map(|x| x.to_string())
+        .map(String::from)
         .collect();
     let char_to_strokes = build_stroke_count_mapping(&stroke_lines, &joyo_lines);
 
