@@ -11,7 +11,6 @@ fn main() {
         lite: true,
         filter_level: ids_rust::FilterLevel::JoyoPlus,
         input: Some(comp_string),
-        lookup: None,
     });
     let mut prev_strokes = 0;
     for result in results {

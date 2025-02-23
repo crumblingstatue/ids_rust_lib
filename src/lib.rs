@@ -31,7 +31,6 @@ pub struct SearchArgs {
     pub lite: bool,
     pub filter_level: FilterLevel,
     pub input: Option<String>,
-    pub lookup: Option<String>,
 }
 
 #[repr(u8)]
@@ -72,12 +71,7 @@ impl ServerData {
         let filter_level = args.filter_level as u8;
         let mut results = Vec::new();
 
-        let mut input = args.input;
-        if input.is_none() {
-            input = args.lookup;
-        }
-
-        if let Some(input) = input {
+        if let Some(input) = args.input {
             let lookup_output = if reverse {
                 ServerData::chars_to_components
             } else {
