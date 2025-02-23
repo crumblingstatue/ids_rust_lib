@@ -43,6 +43,12 @@ pub enum FilterLevel {
     All = 3,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct SearchResult {
+    pub kanji: char,
+    pub strokes: u64,
+}
+
 impl ServerData {
     pub fn radical_text(&self) -> String {
         let mut radical_text = "".to_string();
@@ -60,10 +66,11 @@ impl ServerData {
         }
         radical_text
     }
-    pub fn search(&self, args: SearchArgs) -> String {
+    pub fn search(&self, args: SearchArgs) -> Vec<SearchResult> {
         let reverse = args.reverse;
         let simple = args.simple;
         let filter_level = args.filter_level as u8;
+        let mut results = Vec::new();
 
         let mut input = args.input;
         if input.is_none() {
@@ -115,26 +122,18 @@ impl ServerData {
                 stroke_mapping.get_mut(&count).unwrap().push(c);
             }
             stroke_counts.sort();
-            let mut output_list_html = "".to_string();
             if !stroke_counts.is_empty() {
                 for count in stroke_counts {
-                    output_list_html += &format!("{} strokes：", count);
                     for c in stroke_mapping.get(&count).unwrap() {
-                        output_list_html.push(*c);
+                        results.push(SearchResult {
+                            strokes: count,
+                            kanji: *c,
+                        });
                     }
-                    output_list_html += "\n";
                 }
-            } else {
-                output_list_html += "(no matches)";
             }
-
-            if args.lite {
-                return output_list_html;
-            }
-        } else if args.lite {
-            return "".to_string();
         }
-        String::from("<unimplemented (sorry)>")
+        results
     }
 
     fn chars_to_components(

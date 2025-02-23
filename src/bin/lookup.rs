@@ -5,7 +5,7 @@ fn main() {
     dbg!(&components);
     let data = init().unwrap();
     let comp_string = components.join("");
-    let out = data.search(SearchArgs {
+    let results = data.search(SearchArgs {
         reverse: false,
         simple: true,
         lite: true,
@@ -13,5 +13,13 @@ fn main() {
         input: Some(comp_string),
         lookup: None,
     });
-    println!("{out}");
+    let mut prev_strokes = 0;
+    for result in results {
+        if result.strokes != prev_strokes {
+            println!("\n{} strokes:", result.strokes);
+        }
+        print!(" {} ", result.kanji);
+        prev_strokes = result.strokes;
+    }
+    println!();
 }
