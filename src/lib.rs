@@ -24,16 +24,18 @@ pub struct ServerData {
     pub common_comps: Vec<char>,
 }
 
-pub struct SearchArgs<'a> {
+#[derive(Clone)]
+pub struct SearchArgs {
     pub reverse: bool,
     pub simple: bool,
     pub lite: bool,
     pub filter_level: FilterLevel,
-    pub input: Option<&'a str>,
-    pub lookup: Option<&'a str>,
+    pub input: Option<String>,
+    pub lookup: Option<String>,
 }
 
 #[repr(u8)]
+#[derive(Clone, Copy)]
 pub enum FilterLevel {
     JoyoPlus = 0,
     Media = 1,
@@ -132,7 +134,7 @@ impl ServerData {
         } else if args.lite {
             return "".to_string();
         }
-        unimplemented!()
+        String::from("<unimplemented (sorry)>")
     }
 
     fn chars_to_components(

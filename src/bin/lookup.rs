@@ -10,7 +10,7 @@ fn main() {
         simple: true,
         lite: true,
         filter_level: ids_rust::FilterLevel::JoyoPlus,
-        input: Some(&comp_string),
+        input: Some(comp_string),
         lookup: None,
     });
     println!("{out}");
