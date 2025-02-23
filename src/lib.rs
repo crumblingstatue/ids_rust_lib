@@ -378,7 +378,6 @@ fn build_stroke_count_mapping(
         }
         assert!(kanji_codepoint.starts_with("U+"));
         assert!(kanji_codepoint.len() == 6 || kanji_codepoint.len() == 7); // U+XXXX or U+XXXXX format
-                                                                           //println!("`{}`", &kanji_codepoint[2..]);
         let kanji =
             std::char::from_u32(u32::from_str_radix(&kanji_codepoint[2..], 16).unwrap()).unwrap();
         let stroke_count_text = tokens

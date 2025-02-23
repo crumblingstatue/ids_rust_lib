@@ -1,4 +1,4 @@
-use ids_rust::{init, SearchArgs};
+use ids_rust::{SearchArgs, init};
 
 fn main() {
     let components: Vec<String> = std::env::args().skip(1).collect();
