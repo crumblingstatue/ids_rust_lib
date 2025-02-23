@@ -19,7 +19,7 @@ pub struct ServerData {
     pub kanjidicplus: HashSet<char>,
     pub media: HashSet<char>,
     pub joyoplus: HashSet<char>,
-    pub char_to_strokes: HashMap<char, u64>,
+    pub char_to_strokes: HashMap<char, u8>,
     pub radical_to_char: HashMap<char, char>,
     pub common_comps: Vec<char>,
 }
@@ -45,7 +45,7 @@ pub enum FilterLevel {
 #[derive(Clone, Copy, Debug)]
 pub struct SearchResult {
     pub kanji: char,
-    pub strokes: u64,
+    pub strokes: u8,
 }
 
 impl ServerData {
@@ -105,8 +105,8 @@ impl ServerData {
 
             lookup_vec.sort();
 
-            let mut stroke_mapping = HashMap::<u64, Vec<char>>::new();
-            let mut stroke_counts = Vec::<u64>::new();
+            let mut stroke_mapping = HashMap::<u8, Vec<char>>::new();
+            let mut stroke_counts = Vec::<u8>::new();
             for c in lookup_vec {
                 let count = self.get_strokes(c);
                 if let std::collections::hash_map::Entry::Vacant(e) = stroke_mapping.entry(count) {
@@ -212,7 +212,7 @@ impl ServerData {
     }
 
     // TODO: interpret ② etc.
-    fn get_strokes(&self, c: char) -> u64 {
+    fn get_strokes(&self, c: char) -> u8 {
         if c == '辶' {
             return 4;
         }
@@ -359,8 +359,8 @@ fn ids_lines_to_mappings(
 fn build_stroke_count_mapping(
     unicode_lines: &Vec<String>,
     joyo_lines: &Vec<String>,
-) -> HashMap<char, u64> {
-    let mut stroke_counts = HashMap::<char, u64>::new();
+) -> HashMap<char, u8> {
+    let mut stroke_counts = HashMap::<char, u8>::new();
     for line in unicode_lines {
         let mut tokens: Vec<String> = line.split('\t').map(|x| x.to_string()).collect();
         if tokens.len() < 3 {
@@ -381,7 +381,7 @@ fn build_stroke_count_mapping(
             .map(|x| x.to_string())
             .next()
             .unwrap();
-        let stroke_count = stroke_count_text.parse::<u64>().unwrap();
+        let stroke_count = stroke_count_text.parse::<u8>().unwrap();
         stroke_counts.insert(kanji, stroke_count);
     }
     for line in joyo_lines {
