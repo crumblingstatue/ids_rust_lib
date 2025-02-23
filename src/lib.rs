@@ -106,33 +106,31 @@ impl ServerData {
             let mut stroke_counts = Vec::<u64>::new();
             for c in lookup_vec {
                 let count = self.get_strokes(c);
-                if !stroke_mapping.contains_key(&count) {
-                    stroke_mapping.insert(count, Vec::<char>::new());
+                if let std::collections::hash_map::Entry::Vacant(e) = stroke_mapping.entry(count) {
+                    e.insert(Vec::<char>::new());
                     stroke_counts.push(count);
                 }
                 stroke_mapping.get_mut(&count).unwrap().push(c);
             }
             stroke_counts.sort();
             let mut output_list_html = "".to_string();
-            if stroke_counts.len() > 0 {
+            if !stroke_counts.is_empty() {
                 for count in stroke_counts {
                     output_list_html += &format!("{} strokes：", count);
                     for c in stroke_mapping.get(&count).unwrap() {
                         output_list_html.push(*c);
                     }
-                    output_list_html += &"\n";
+                    output_list_html += "\n";
                 }
             } else {
-                output_list_html += &"(no matches)";
+                output_list_html += "(no matches)";
             }
 
             if args.lite {
                 return output_list_html;
             }
-        } else {
-            if args.lite {
-                return "".to_string();
-            }
+        } else if args.lite {
+            return "".to_string();
         }
         unimplemented!()
     }
@@ -156,7 +154,7 @@ impl ServerData {
             seen.insert(*c);
         }
 
-        if isrecursive && new.len() > 0 {
+        if isrecursive && !new.is_empty() {
             new = new
                 .union(&self.chars_to_components(seen, &new, isrecursive))
                 .cloned()
@@ -183,7 +181,7 @@ impl ServerData {
             seen.insert(*c);
         }
 
-        if isrecursive && new.len() > 0 {
+        if isrecursive && !new.is_empty() {
             for c in new.clone() {
                 for c2 in self.component_to_chars(seen, c, isrecursive) {
                     new.insert(c2);
@@ -336,9 +334,7 @@ fn ids_lines_to_mappings(
                     continue;
                 }
 
-                if !char_to_comp.contains_key(&kanji) {
-                    char_to_comp.insert(kanji, HashSet::<char>::new());
-                }
+                char_to_comp.entry(kanji).or_default();
                 char_to_comp.get_mut(&kanji).unwrap().insert(c);
 
                 if first {
@@ -350,9 +346,7 @@ fn ids_lines_to_mappings(
                 }
                 char_to_first_comp.get_mut(&kanji).unwrap().push(c);
 
-                if !comp_to_char.contains_key(&c) {
-                    comp_to_char.insert(c, HashSet::<char>::new());
-                }
+                comp_to_char.entry(c).or_default();
                 comp_to_char.get_mut(&c).unwrap().insert(kanji);
             }
             first = false;
