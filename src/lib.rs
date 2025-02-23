@@ -35,7 +35,7 @@ pub struct SearchArgs {
 }
 
 #[repr(u8)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum FilterLevel {
     JoyoPlus = 0,
     Media = 1,
